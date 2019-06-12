@@ -53,6 +53,7 @@ export const sortClassMembers = {
 						}
 					}
 				},
+
 			};
 
 			rules.ClassExpression = rules.ClassDeclaration;
@@ -61,7 +62,7 @@ export const sortClassMembers = {
 		}
 
 		sortClassMembersRule.schema = sortClassMembersSchema;
-
+		sortClassMembersRule.fixable = "code";
 		return sortClassMembersRule;
 	},
 };
@@ -86,8 +87,7 @@ function reportProblem({
 		reportData.more = problemCount - 1;
 		reportData.problem = problemCount === 2 ? 'problem' : 'problems';
 	}
-
-	context.report({ node: source.node, message, data: reportData });
+	context.report({ node: source.node, message, data: reportData, fix: fixer => [ fixer.remove(source.node), fixer.insertTextBefore(target.node, context.getSourceCode().getText(source.node) + "\n")] });
 }
 
 function getMemberDescription(member, { groupAccessors }) {
