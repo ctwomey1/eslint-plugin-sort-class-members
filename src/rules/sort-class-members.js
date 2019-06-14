@@ -1,4 +1,5 @@
 import { sortClassMembersSchema } from './schema';
+import astUtils from 'eslint/lib/util/ast-utils';
 
 export const sortClassMembers = {
 	getRule(defaults = {}) {
@@ -10,7 +11,6 @@ export const sortClassMembers = {
 			const groups = { ...builtInGroups, ...defaults.groups, ...options.groups };
 			const orderedSlots = getExpectedOrder(order, groups);
 			const groupAccessors = accessorPairPositioning !== 'any';
-
 			const rules = {
 				ClassDeclaration(node) {
 					let members = getClassMemberInfos(node, context.getSourceCode(), orderedSlots);
@@ -21,7 +21,7 @@ export const sortClassMembers = {
 						const message =
 							'Expected {{ source }} to come immediately {{ expected }} {{ target }}.';
 
-						reportProblem({ problem, context, message, stopAfterFirst, problemCount });
+						reportProblem({ problem, context, message, stopAfterFirst, problemCount});
 						if (stopAfterFirst) {
 							break;
 						}
@@ -73,7 +73,7 @@ function reportProblem({
 	context,
 	stopAfterFirst,
 	problemCount,
-	groupAccessors,
+	groupAccessors
 }) {
 	const { source, target, expected } = problem;
 	const reportData = {
@@ -87,7 +87,26 @@ function reportProblem({
 		reportData.more = problemCount - 1;
 		reportData.problem = problemCount === 2 ? 'problem' : 'problems';
 	}
-	context.report({ node: source.node, message, data: reportData, fix: fixer => [ fixer.remove(source.node), fixer.insertTextBefore(target.node, context.getSourceCode().getText(source.node) + "\n")] });
+
+	context.report({ node: source.node, message, data: reportData, 
+		fix(fixer) {
+			const fixes = [];
+			const sourceCode = context.getSourceCode();
+			const sourceAfterToken = sourceCode.getTokenAfter(source.node);
+			const sourceJSDoc = sourceCode.getCommentsBefore(source.node).slice(-1).pop();
+			const targetJSDoc = sourceCode.getCommentsBefore(target.node).slice(-1).pop();
+			const insertTargetNode = targetJSDoc || target.node;
+			if(sourceJSDoc) {
+				fixes.push(fixer.remove(sourceJSDoc));
+				fixes.push(fixer.insertTextBefore(insertTargetNode,`${context.getSourceCode().getText(sourceJSDoc)}\n`));
+			}
+			
+			const memberSeperator = astUtils.isTokenOnSameLine(source.node, sourceAfterToken) ? ' ' : '\n';
+			fixes.push(fixer.remove(source.node));
+			fixes.push(fixer.insertTextBefore(insertTargetNode, `${context.getSourceCode().getText(source.node, beforeCount, afterCount)}${memberSeperator}`));
+			return fixes; 			
+		}
+	});
 }
 
 function getMemberDescription(member, { groupAccessors }) {
