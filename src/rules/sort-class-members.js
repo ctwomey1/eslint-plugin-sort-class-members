@@ -103,7 +103,7 @@ function reportProblem({
 			
 			const memberSeperator = astUtils.isTokenOnSameLine(source.node, sourceAfterToken) ? ' ' : '\n';
 			fixes.push(fixer.remove(source.node));
-			fixes.push(fixer.insertTextBefore(insertTargetNode, `${context.getSourceCode().getText(source.node, beforeCount, afterCount)}${memberSeperator}`));
+			fixes.push(fixer.insertTextBefore(insertTargetNode, `${context.getSourceCode().getText(source.node)}${memberSeperator}`));
 			return fixes; 			
 		}
 	});
