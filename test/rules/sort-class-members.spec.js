@@ -273,8 +273,7 @@ ruleTester.run('sort-class-members', rule, {
 		},
 		// [everything-else] group
 		{
-			code: 'class A { xyz(){} before(){} after(){}; }',
-			output: 'class A { before(){} after(){}; xyz(){} }',
+			code: 'class A { xyz(){} before(){} after(){}; }', // no output fixes cause conflicts
 			errors: [
 				{
 					message: 'Expected method before to come before method xyz.',
@@ -346,8 +345,7 @@ ruleTester.run('sort-class-members', rule, {
 			options: accessorOptions,
 		},
 		{
-			code: 'class A { b(){} get a(){} set a(v){} }',
-			output: 'class A { get a(){} set a(v){} b(){}  }',
+			code: 'class A { b(){} get a(){} set a(v){} }', // no output fixes cause conflicts
 			errors: [
 				{
 					message: 'Expected accessor pair a to come before method b.',
@@ -357,8 +355,7 @@ ruleTester.run('sort-class-members', rule, {
 			options: accessorOptions,
 		},
 		{
-			code: 'class A { b(){} get a(){} c(){} set a(v){} }',
-			output: 'class A { get a(){} set a(v){} b(){} c(){}  }',
+			code: 'class A { b(){} get a(){} c(){} set a(v){} }', // no output fixes cause conflicts
 			errors: [
 				{
 					message: 'Expected accessor pair a to come before method b.',
@@ -418,7 +415,7 @@ ruleTester.run('sort-class-members', rule, {
 			options: defaultOptions,
 		},
 
-		//fix tests
+		// fix tests
 		{
 			code: `class A {\n/**\n* jsdoc thing\n*/\nconstructor(){} \nstatic beforeCtor(){} \n}`,
 			output: `class A {\nstatic beforeCtor(){}\n/**\n* jsdoc thing\n*/\nconstructor(){} \n \n}`,
