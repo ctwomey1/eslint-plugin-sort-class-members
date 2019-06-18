@@ -91,7 +91,8 @@ function reportProblem({
 		node: source.node, message, data: reportData,
 		fix(fixer) {
 			const fixes = [];
-			if (expected !== 'before' || expected !== 'after') {
+			if (expected !== 'before' && expected !== 'after') {
+				console.log('whoops?', expected);
 				return fixes;
 			}
 			const sourceCode = context.getSourceCode();
