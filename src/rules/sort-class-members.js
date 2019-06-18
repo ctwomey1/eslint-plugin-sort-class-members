@@ -91,6 +91,9 @@ function reportProblem({
 	context.report({ node: source.node, message, data: reportData, 
 		fix(fixer) {
 			const fixes = [];
+			if (expected !== 'before' || expected !== 'after'){
+				return fixes;
+			}
 			const sourceCode = context.getSourceCode();
 			const sourceAfterToken = sourceCode.getTokenAfter(source.node);
 			const sourceJSDoc = sourceCode.getCommentsBefore(source.node).slice(-1).pop();
@@ -98,12 +101,20 @@ function reportProblem({
 			const insertTargetNode = targetJSDoc || target.node;
 			if(sourceJSDoc) {
 				fixes.push(fixer.remove(sourceJSDoc));
-				fixes.push(fixer.insertTextBefore(insertTargetNode,`${context.getSourceCode().getText(sourceJSDoc)}\n`));
+				if(expected === 'before') {
+					fixes.push(fixer.insertTextBefore(insertTargetNode,`${context.getSourceCode().getText(sourceJSDoc)}\n`));
+				} else {
+					fixes.push(fixer.insertTextAfter(insertTargetNode,`\n${context.getSourceCode().getText(sourceJSDoc)}`));
+				}
 			}
 			
 			const memberSeperator = astUtils.isTokenOnSameLine(source.node, sourceAfterToken) ? ' ' : '\n';
 			fixes.push(fixer.remove(source.node));
-			fixes.push(fixer.insertTextBefore(insertTargetNode, `${context.getSourceCode().getText(source.node)}${memberSeperator}`));
+			if(expected === 'before') {
+				fixes.push(fixer.insertTextBefore(insertTargetNode, `${context.getSourceCode().getText(source.node)}${memberSeperator}`));
+			} else {
+				fixes.push(fixer.insertTextAfter(insertTargetNode, `${memberSeperator}${context.getSourceCode().getText(source.node)}`));
+			}
 			return fixes; 			
 		}
 	});
