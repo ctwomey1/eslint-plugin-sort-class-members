@@ -21,7 +21,7 @@ export const sortClassMembers = {
 						const message =
 							'Expected {{ source }} to come immediately {{ expected }} {{ target }}.';
 
-						reportProblem({ problem, context, message, stopAfterFirst, problemCount});
+						reportProblem({ problem, context, message, stopAfterFirst, problemCount });
 						if (stopAfterFirst) {
 							break;
 						}
@@ -53,7 +53,6 @@ export const sortClassMembers = {
 						}
 					}
 				},
-
 			};
 
 			rules.ClassExpression = rules.ClassDeclaration;
@@ -73,7 +72,7 @@ function reportProblem({
 	context,
 	stopAfterFirst,
 	problemCount,
-	groupAccessors
+	groupAccessors,
 }) {
 	const { source, target, expected } = problem;
 	const reportData = {
@@ -88,10 +87,11 @@ function reportProblem({
 		reportData.problem = problemCount === 2 ? 'problem' : 'problems';
 	}
 
-	context.report({ node: source.node, message, data: reportData, 
+	context.report({
+		node: source.node, message, data: reportData,
 		fix(fixer) {
 			const fixes = [];
-			if (expected !== 'before' || expected !== 'after'){
+			if (expected !== 'before' || expected !== 'after') {
 				return fixes;
 			}
 			const sourceCode = context.getSourceCode();
@@ -99,23 +99,23 @@ function reportProblem({
 			const sourceJSDoc = sourceCode.getCommentsBefore(source.node).slice(-1).pop();
 			const targetJSDoc = sourceCode.getCommentsBefore(target.node).slice(-1).pop();
 			const insertTargetNode = targetJSDoc || target.node;
-			if(sourceJSDoc) {
+			if (sourceJSDoc) {
 				fixes.push(fixer.remove(sourceJSDoc));
-				if(expected === 'before') {
-					fixes.push(fixer.insertTextBefore(insertTargetNode,`${context.getSourceCode().getText(sourceJSDoc)}\n`));
+				if (expected === 'before') {
+					fixes.push(fixer.insertTextBefore(insertTargetNode, `${context.getSourceCode().getText(sourceJSDoc)}\n`));
 				} else {
-					fixes.push(fixer.insertTextAfter(insertTargetNode,`\n${context.getSourceCode().getText(sourceJSDoc)}`));
+					fixes.push(fixer.insertTextAfter(insertTargetNode, `\n${context.getSourceCode().getText(sourceJSDoc)}`));
 				}
 			}
-			
+
 			const memberSeperator = astUtils.isTokenOnSameLine(source.node, sourceAfterToken) ? ' ' : '\n';
 			fixes.push(fixer.remove(source.node));
-			if(expected === 'before') {
+			if (expected === 'before') {
 				fixes.push(fixer.insertTextBefore(insertTargetNode, `${context.getSourceCode().getText(source.node)}${memberSeperator}`));
 			} else {
 				fixes.push(fixer.insertTextAfter(insertTargetNode, `${memberSeperator}${context.getSourceCode().getText(source.node)}`));
 			}
-			return fixes; 			
+			return fixes;
 		}
 	});
 }
